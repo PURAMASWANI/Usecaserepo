@@ -24,6 +24,9 @@ public class GoogleSearchTest {
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
+        // Additional arguments to avoid consent page
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.addArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36");
         driver = new ChromeDriver(options);
     }
 
@@ -37,14 +40,11 @@ public class GoogleSearchTest {
         searchBox.sendKeys("Selenium WebDriver");
         searchBox.submit();
 
-        // Wait for the title to contain the search term (or "Google Search")
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        boolean titleContainsExpected = wait.until(ExpectedConditions.or(
-            ExpectedConditions.titleContains("Selenium WebDriver"),
-            ExpectedConditions.titleContains("Google Search")
-        ));
+        // Wait for at least one search result heading to appear (ensures results are loaded)
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("h3")));
 
-        // Assert that the title contains either the search term or "Google Search"
+        // Now check the title (should be either "Selenium WebDriver - Google Search" or similar)
         String title = driver.getTitle();
         assertTrue(title.contains("Selenium WebDriver") || title.contains("Google Search"),
             "Title did not contain expected text. Actual title: " + title);
